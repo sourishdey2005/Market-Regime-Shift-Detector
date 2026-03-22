@@ -988,30 +988,11 @@ def main():
             fig_candle = create_candlestick_chart(df)
             st.plotly_chart(fig_candle, use_container_width=True)
         
-        # Tab 3: Volatility (moved from tab2)
+        # Tab 3: Volatility Analysis
         with tab3:
-            col1, col2 = st.columns(2)
-            with col1:
-                fig_dist = create_regime_distribution(df)
-                st.plotly_chart(fig_dist, use_container_width=True)
+            st.subheader("📊 Volatility Analysis")
             
-            with col2:
-                # Regime statistics
-                stats = df.groupby('Regime_Label').agg({
-                    'Returns': ['mean', 'std'],
-                    'Realized_Vol': 'mean',
-                    'VIX': 'mean'
-                }).round(4)
-                
-                stats.columns = ['Avg Return', 'Return Vol', 'Avg Realized Vol', 'Avg VIX']
-                stats['Avg Return'] = stats['Avg Return'] * 100  # Convert to %
-                stats['Annualized Return'] = (stats['Avg Return'] * 252).round(2)
-                
-                st.subheader("Regime Characteristics")
-                st.dataframe(stats.style.background_gradient(cmap='RdYlGn', subset=['Annualized Return']), use_container_width=True)
-        
-        # Tab 4: Volatility Analysis
-        with tab4:
+            # Volatility Charts
             col1, col2 = st.columns(2)
             with col1:
                 fig_vol = create_volatility_comparison(df)
@@ -1028,11 +1009,40 @@ def main():
                 fig_vol_reg = create_vol_regime_scatter(df)
                 st.plotly_chart(fig_vol_reg, use_container_width=True)
             
-            fig_vix_spike = create_vix_spike_analysis(df)
-            st.plotly_chart(fig_vix_spike, use_container_width=True)
+            # Additional Vol charts
+            col5, col6 = st.columns(2)
+            with col5:
+                fig_vix_spike = create_vix_spike_analysis(df)
+                st.plotly_chart(fig_vix_spike, use_container_width=True)
+            with col6:
+                fig_vol_term = create_volatility_term_structure(df)
+                st.plotly_chart(fig_vol_term, use_container_width=True)
+            
+            # Regime Distribution
+            col7, col8 = st.columns(2)
+            with col7:
+                fig_dist = create_regime_distribution(df)
+                st.plotly_chart(fig_dist, use_container_width=True)
+            with col8:
+                # Regime statistics
+                stats = df.groupby('Regime_Label').agg({
+                    'Returns': ['mean', 'std'],
+                    'Realized_Vol': 'mean',
+                    'VIX': 'mean'
+                }).round(4)
+                
+                stats.columns = ['Avg Return', 'Return Vol', 'Avg Realized Vol', 'Avg VIX']
+                stats['Avg Return'] = stats['Avg Return'] * 100
+                stats['Annualized Return'] = (stats['Avg Return'] * 252).round(2)
+                
+                st.subheader("Regime Characteristics")
+                st.dataframe(stats.style.background_gradient(cmap='RdYlGn', subset=['Annualized Return']), use_container_width=True)
         
-        # Tab 5: Macro Analysis
-        with tab5:
+        # Tab 4: Macro Analysis (now includes Volatility + Macro)
+        with tab4:
+            st.subheader("💰 Macro Economics & Volatility")
+            
+            # Macro Charts
             col1, col2 = st.columns(2)
             with col1:
                 fig_yield = create_yield_chart(df)
@@ -1049,20 +1059,45 @@ def main():
                 fig_usd = create_usd_chart(df)
                 st.plotly_chart(fig_usd, use_container_width=True)
             
-            fig_corr = create_correlation_matrix(df)
-            st.plotly_chart(fig_corr, use_container_width=True)
+            # Correlation & Macro
+            col5, col6 = st.columns(2)
+            with col5:
+                fig_corr = create_correlation_matrix(df)
+                st.plotly_chart(fig_corr, use_container_width=True)
+            with col6:
+                fig_roll_corr = create_rolling_correlation(df)
+                st.plotly_chart(fig_roll_corr, use_container_width=True)
             
-            fig_roll_corr = create_rolling_correlation(df)
-            st.plotly_chart(fig_roll_corr, use_container_width=True)
+            col7, col8 = st.columns(2)
+            with col7:
+                fig_inf = create_inflation_ratio(df)
+                st.plotly_chart(fig_inf, use_container_width=True)
+            with col8:
+                fig_macro_mom = create_macro_momentum(df)
+                st.plotly_chart(fig_macro_mom, use_container_width=True)
             
-            fig_inf = create_inflation_ratio(df)
-            st.plotly_chart(fig_inf, use_container_width=True)
+            # Additional Vol Charts
+            col9, col10 = st.columns(2)
+            with col9:
+                fig_vol = create_volatility_comparison(df)
+                st.plotly_chart(fig_vol, use_container_width=True)
+            with col10:
+                fig_vol_cls = create_volatility_clustering(df)
+                st.plotly_chart(fig_vol_cls, use_container_width=True)
             
-            fig_macro_mom = create_macro_momentum(df)
-            st.plotly_chart(fig_macro_mom, use_container_width=True)
+            col11, col12 = st.columns(2)
+            with col11:
+                fig_vol_surf = create_vol_surface(df)
+                st.plotly_chart(fig_vol_surf, use_container_width=True)
+            with col12:
+                fig_vix_spike = create_vix_spike_analysis(df)
+                st.plotly_chart(fig_vix_spike, use_container_width=True)
         
-        # Tab 6: Regime Analysis
-        with tab6:
+        # Tab 5: Regime Analysis
+        with tab5:
+            st.subheader("🔄 Regime Analysis & Transitions")
+            
+            # Regime Charts
             fig_trans = create_regime_transitions(df)
             st.plotly_chart(fig_trans, use_container_width=True)
             
@@ -1074,44 +1109,121 @@ def main():
                 fig_ret_box = create_regime_returns_box(df)
                 st.plotly_chart(fig_ret_box, use_container_width=True)
             
-            fig_stab = create_regime_stability(df)
-            st.plotly_chart(fig_stab, use_container_width=True)
+            col3, col4 = st.columns(2)
+            with col3:
+                fig_stab = create_regime_stability(df)
+                st.plotly_chart(fig_stab, use_container_width=True)
+            with col4:
+                fig_perf = create_regime_performance(df)
+                st.plotly_chart(fig_perf, use_container_width=True)
             
-            fig_perf = create_regime_performance(df)
-            st.plotly_chart(fig_perf, use_container_width=True)
+            col5, col6 = st.columns(2)
+            with col5:
+                fig_heat = create_regime_heatmap(df)
+                st.plotly_chart(fig_heat, use_container_width=True)
+            with col6:
+                fig_switch = create_regime_switching_analysis(df)
+                st.plotly_chart(fig_switch, use_container_width=True)
             
-            fig_heat = create_regime_heatmap(df)
-            st.plotly_chart(fig_heat, use_container_width=True)
+            # Additional new charts
+            col7, col8 = st.columns(2)
+            with col7:
+                fig_prob = create_regime_probability_timeline(df)
+                st.plotly_chart(fig_prob, use_container_width=True)
+            with col8:
+                fig_rr = create_risk_reward_analysis(df)
+                st.plotly_chart(fig_rr, use_container_width=True)
+            
+            # Market breadth
+            fig_breadth = create_market_breadth(df)
+            st.plotly_chart(fig_breadth, use_container_width=True)
         
-        # Tab 7: Risk & Returns
-        with tab7:
+        # Tab 6: Risk Metrics
+        with tab6:
+            st.subheader("⚠️ Risk Metrics & Analysis")
+            
+            # Risk Charts
             fig_sharpe = create_rolling_sharpe(df)
             st.plotly_chart(fig_sharpe, use_container_width=True)
             
-            fig_dd = create_drawdown_chart(df)
-            st.plotly_chart(fig_dd, use_container_width=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                fig_dd = create_drawdown_chart(df)
+                st.plotly_chart(fig_dd, use_container_width=True)
+            with col2:
+                fig_ret_hist = create_returns_histogram(df)
+                st.plotly_chart(fig_ret_hist, use_container_width=True)
             
-            fig_ret_hist = create_returns_histogram(df)
-            st.plotly_chart(fig_ret_hist, use_container_width=True)
+            # Additional risk metrics
+            col3, col4 = st.columns(2)
+            with col3:
+                fig_indicator = create_market_regime_indicator(df)
+                st.plotly_chart(fig_indicator, use_container_width=True)
+            with col4:
+                # Risk metrics display
+                var_95 = np.percentile(df['Returns'].dropna(), 5) * 100
+                max_dd = ((df['SPY_Close'] / df['SPY_Close'].cummax()) - 1).min() * 100
+                
+                st.metric("95% VaR (daily)", f"{var_95:.2f}%")
+                st.metric("Max Drawdown", f"{max_dd:.2f}%")
+            
+            # Gap analysis
+            fig_gap = create_gap_analysis(df)
+            st.plotly_chart(fig_gap, use_container_width=True)
+        
+        # Tab 7: Returns Analysis
+        with tab7:
+            st.subheader("📉 Returns & Performance")
+            
+            # Returns Charts
+            col1, col2 = st.columns(2)
+            with col1:
+                fig_season = create_seasonality_chart(df)
+                st.plotly_chart(fig_season, use_container_width=True)
+            with col2:
+                fig_ret_box = create_regime_returns_box(df)
+                st.plotly_chart(fig_ret_box, use_container_width=True)
+            
+            col3, col4 = st.columns(2)
+            with col3:
+                fig_perf = create_regime_performance(df)
+                st.plotly_chart(fig_perf, use_container_width=True)
+            with col4:
+                fig_rr = create_risk_reward_analysis(df)
+                st.plotly_chart(fig_rr, use_container_width=True)
+            
+            # Volume profile
+            fig_volprof = create_volume_profile(df)
+            st.plotly_chart(fig_volprof, use_container_width=True)
         
         # Tab 8: Advanced Technical Analysis
         with tab8:
             st.subheader("🚀 Advanced Technical Indicators")
             
+            # Advanced Charts
             fig_adv = create_advanced_indicators(df)
             st.plotly_chart(fig_adv, use_container_width=True)
             
-            fig_mom = create_market_momentum(df)
-            st.plotly_chart(fig_mom, use_container_width=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                fig_mom = create_market_momentum(df)
+                st.plotly_chart(fig_mom, use_container_width=True)
+            with col2:
+                fig_sr = create_support_resistance(df)
+                st.plotly_chart(fig_sr, use_container_width=True)
             
-            fig_sr = create_support_resistance(df)
-            st.plotly_chart(fig_sr, use_container_width=True)
-            
+            # Relative strength
             fig_rs = create_relative_strength(df)
             st.plotly_chart(fig_rs, use_container_width=True)
+            
+            # Correlation by regime
+            fig_corr_reg = create_correlation_regime_analysis(df)
+            st.plotly_chart(fig_corr_reg, use_container_width=True)
         
-        # Tab 9: Feature Analysis (original tab3 content)
+        # Tab 9: Feature Analysis
         with tab9:
+            st.subheader("🎯 Feature Importance & Model Insights")
+            
             col1, col2 = st.columns([2, 1])
             with col1:
                 fig_imp = create_feature_importance(results['feature_importance'])
@@ -1129,63 +1241,8 @@ def main():
                 - {df[top_feature['feature']].iloc[-1]:.4f} (latest)
                 - Trend: {'↗️ Rising' if df[top_feature['feature']].iloc[-5:].mean() > df[top_feature['feature']].iloc[-20:-5].mean() else '↘️ Falling'}
                 """)
-                
-                # Risk metrics
-                st.subheader("⚠️ Risk Metrics")
-                var_95 = np.percentile(df['Returns'].dropna(), 5) * 100
-                max_dd = ((df['SPY_Close'] / df['SPY_Close'].cummax()) - 1).min() * 100
-                
-                st.metric("95% VaR (daily)", f"{var_95:.2f}%")
-                st.metric("Max Drawdown", f"{max_dd:.2f}%")
         
-        # ============ NEW ADVANCED CHARTS SECTION ============
-        st.markdown("---")
-        st.subheader("📈 Advanced Regime Analytics")
-        
-        # Row 1: Regime Probability + Vol Term Structure
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_prob = create_regime_probability_timeline(df)
-            st.plotly_chart(fig_prob, use_container_width=True)
-        with col2:
-            fig_vol_term = create_volatility_term_structure(df)
-            st.plotly_chart(fig_vol_term, use_container_width=True)
-        
-        # Row 2: Market Breadth + Risk/Reward
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_breadth = create_market_breadth(df)
-            st.plotly_chart(fig_breadth, use_container_width=True)
-        with col2:
-            fig_rr = create_risk_reward_analysis(df)
-            st.plotly_chart(fig_rr, use_container_width=True)
-        
-        # Row 3: Seasonality + Gap Analysis
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_season = create_seasonality_chart(df)
-            st.plotly_chart(fig_season, use_container_width=True)
-        with col2:
-            fig_gap = create_gap_analysis(df)
-            st.plotly_chart(fig_gap, use_container_width=True)
-        
-        # Row 4: Volume Profile + Regime Switching
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_volprof = create_volume_profile(df)
-            st.plotly_chart(fig_volprof, use_container_width=True)
-        with col2:
-            fig_switch = create_regime_switching_analysis(df)
-            st.plotly_chart(fig_switch, use_container_width=True)
-        
-        # Row 5: Market Regime Indicator + Correlation by Regime
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_indicator = create_market_regime_indicator(df)
-            st.plotly_chart(fig_indicator, use_container_width=True)
-        with col2:
-            fig_corr_reg = create_correlation_regime_analysis(df)
-            st.plotly_chart(fig_corr_reg, use_container_width=True)
+
         
         # Footer
         st.markdown("---")
