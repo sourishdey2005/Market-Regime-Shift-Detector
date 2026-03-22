@@ -1179,18 +1179,18 @@ def main():
             col1, col2 = st.columns(2)
             with col1:
                 fig_season = create_seasonality_chart(df)
-                st.plotly_chart(fig_season, use_container_width=True)
+                st.plotly_chart(fig_season, use_container_width=True, key="seasonality_tab7")
             with col2:
-                fig_ret_box = create_regime_returns_box(df)
-                st.plotly_chart(fig_ret_box, use_container_width=True)
+                fig_ret_box2 = create_regime_returns_box(df)
+                st.plotly_chart(fig_ret_box2, use_container_width=True, key="returns_box_tab7")
             
             col3, col4 = st.columns(2)
             with col3:
-                fig_perf = create_regime_performance(df)
-                st.plotly_chart(fig_perf, use_container_width=True)
+                fig_perf2 = create_regime_performance(df)
+                st.plotly_chart(fig_perf2, use_container_width=True, key="performance_tab7")
             with col4:
-                fig_rr = create_risk_reward_analysis(df)
-                st.plotly_chart(fig_rr, use_container_width=True)
+                fig_rr2 = create_risk_reward_analysis(df)
+                st.plotly_chart(fig_rr2, use_container_width=True, key="risk_reward_tab7")
             
             # Volume profile
             fig_volprof = create_volume_profile(df)
