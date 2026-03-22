@@ -995,11 +995,11 @@ def main():
             # Volatility Charts
             col1, col2 = st.columns(2)
             with col1:
-                fig_vol = create_volatility_comparison(df)
-                st.plotly_chart(fig_vol, use_container_width=True)
+                fig_vol_comp = create_volatility_comparison(df)
+                st.plotly_chart(fig_vol_comp, use_container_width=True)
             with col2:
-                fig_vol_cls = create_volatility_clustering(df)
-                st.plotly_chart(fig_vol_cls, use_container_width=True)
+                fig_vol_cluster = create_volatility_clustering(df)
+                st.plotly_chart(fig_vol_cluster, use_container_width=True)
             
             col3, col4 = st.columns(2)
             with col3:
@@ -1079,19 +1079,19 @@ def main():
             # Additional Vol Charts
             col9, col10 = st.columns(2)
             with col9:
-                fig_vol = create_volatility_comparison(df)
-                st.plotly_chart(fig_vol, use_container_width=True)
+                fig_vol_vix = create_volatility_comparison(df)
+                st.plotly_chart(fig_vol_vix, use_container_width=True, key="vol_vix_tab3")
             with col10:
-                fig_vol_cls = create_volatility_clustering(df)
-                st.plotly_chart(fig_vol_cls, use_container_width=True)
+                fig_vol_cluster2 = create_volatility_clustering(df)
+                st.plotly_chart(fig_vol_cluster2, use_container_width=True, key="vol_cluster_tab3")
             
             col11, col12 = st.columns(2)
             with col11:
-                fig_vol_surf = create_vol_surface(df)
-                st.plotly_chart(fig_vol_surf, use_container_width=True)
+                fig_vol_surf2 = create_vol_surface(df)
+                st.plotly_chart(fig_vol_surf2, use_container_width=True, key="vol_surf_tab3")
             with col12:
-                fig_vix_spike = create_vix_spike_analysis(df)
-                st.plotly_chart(fig_vix_spike, use_container_width=True)
+                fig_vix_spike2 = create_vix_spike_analysis(df)
+                st.plotly_chart(fig_vix_spike2, use_container_width=True, key="vix_spike_tab3")
         
         # Tab 5: Regime Analysis
         with tab5:
