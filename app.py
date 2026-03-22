@@ -808,7 +808,7 @@ def create_relative_strength(df):
 def main():
     st.markdown('''
     <div class="header-container">
-        <h1 class="main-header">🎯 Market Regime Shift Detector</h1>
+        <h1 class="main-header">Market Regime Shift Detector</h1>
     </div>
     ''', unsafe_allow_html=True)
     st.markdown("""
