@@ -29,13 +29,34 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        background: linear-gradient(90deg, #1f77b4, #ff7f0e);
+        font-size: 3.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7, #DDA0DD);
+        background-size: 300% 300%;
+        animation: gradient-shift 5s ease infinite;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-align: center;
         margin-bottom: 2rem;
+        padding: 20px;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        border-radius: 15px;
+        display: inline-block;
+        width: 100%;
+    }
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .header-container {
+        text-align: center;
+        background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        padding: 25px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
     .regime-indicator {
         padding: 2rem;
@@ -785,7 +806,11 @@ def create_relative_strength(df):
 
 
 def main():
-    st.markdown('<h1 class="main-header">🎯 Market Regime Shift Detector</h1>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="header-container">
+        <h1 class="main-header">🎯 Market Regime Shift Detector</h1>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown("""
     <div style='text-align: center; color: #666; margin-bottom: 2rem;'>
         AI-Powered Macro Regime Detection using Hidden Markov Models & Multi-Factor Analysis
