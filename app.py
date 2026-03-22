@@ -1138,6 +1138,55 @@ def main():
                 st.metric("95% VaR (daily)", f"{var_95:.2f}%")
                 st.metric("Max Drawdown", f"{max_dd:.2f}%")
         
+        # ============ NEW ADVANCED CHARTS SECTION ============
+        st.markdown("---")
+        st.subheader("📈 Advanced Regime Analytics")
+        
+        # Row 1: Regime Probability + Vol Term Structure
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_prob = create_regime_probability_timeline(df)
+            st.plotly_chart(fig_prob, use_container_width=True)
+        with col2:
+            fig_vol_term = create_volatility_term_structure(df)
+            st.plotly_chart(fig_vol_term, use_container_width=True)
+        
+        # Row 2: Market Breadth + Risk/Reward
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_breadth = create_market_breadth(df)
+            st.plotly_chart(fig_breadth, use_container_width=True)
+        with col2:
+            fig_rr = create_risk_reward_analysis(df)
+            st.plotly_chart(fig_rr, use_container_width=True)
+        
+        # Row 3: Seasonality + Gap Analysis
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_season = create_seasonality_chart(df)
+            st.plotly_chart(fig_season, use_container_width=True)
+        with col2:
+            fig_gap = create_gap_analysis(df)
+            st.plotly_chart(fig_gap, use_container_width=True)
+        
+        # Row 4: Volume Profile + Regime Switching
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_volprof = create_volume_profile(df)
+            st.plotly_chart(fig_volprof, use_container_width=True)
+        with col2:
+            fig_switch = create_regime_switching_analysis(df)
+            st.plotly_chart(fig_switch, use_container_width=True)
+        
+        # Row 5: Market Regime Indicator + Correlation by Regime
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_indicator = create_market_regime_indicator(df)
+            st.plotly_chart(fig_indicator, use_container_width=True)
+        with col2:
+            fig_corr_reg = create_correlation_regime_analysis(df)
+            st.plotly_chart(fig_corr_reg, use_container_width=True)
+        
         # Footer
         st.markdown("---")
         st.caption(f"""
@@ -1159,6 +1208,317 @@ def main():
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+
+# ============ ADDITIONAL ADVANCED VISUALIZATIONS ============
+
+
+def create_regime_probability_timeline(df):
+    """Regime probability timeline showing regime likelihood over time"""
+    df = df.copy()
+    regime_map = {'Bull': 2, 'Sideways': 1, 'Bear': 0}
+    df['Regime_Num'] = df['Regime_Label'].map(regime_map)
+    
+    # Calculate rolling probability (simplified)
+    df['Regime_Prob'] = df['Regime_Num'].rolling(5).mean()
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['Regime_Prob'],
+        mode='lines+markers',
+        name='Regime Probability',
+        line=dict(color='blue', width=2),
+        marker=dict(size=4)
+    ))
+    fig.add_hline(y=2, line_dash='dash', line_color='#00CC96', annotation_text='Bull')
+    fig.add_hline(y=1, line_dash='dash', line_color='#FFA500', annotation_text='Sideways')
+    fig.add_hline(y=0, line_dash='dash', line_color='#FF4B4B', annotation_text='Bear')
+    fig.update_layout(
+        title='Regime Probability Timeline',
+        template='plotly_white',
+        height=400,
+        yaxis_range=[-0.5, 2.5],
+        yaxis_ticktext=['Bear', 'Sideways', 'Bull'],
+        yaxis_tickvals=[0, 1, 2]
+    )
+    return fig
+
+
+def create_volatility_term_structure(df):
+    """Volatility term structure - realized vol at different horizons"""
+    df = df.copy()
+    df['Vol_5d'] = df['Returns'].rolling(5).std() * np.sqrt(252)
+    df['Vol_10d'] = df['Returns'].rolling(10).std() * np.sqrt(252)
+    df['Vol_20d'] = df['Returns'].rolling(20).std() * np.sqrt(252)
+    df['Vol_60d'] = df['Returns'].rolling(60).std() * np.sqrt(252)
+    
+    # Current values
+    current_vol = {
+        '5-Day': df['Vol_5d'].iloc[-1] * 100,
+        '10-Day': df['Vol_10d'].iloc[-1] * 100,
+        '20-Day': df['Vol_20d'].iloc[-1] * 100,
+        '60-Day': df['Vol_60d'].iloc[-1] * 100
+    }
+    
+    fig = go.Figure()
+    terms = list(current_vol.keys())
+    vols = list(current_vol.values())
+    
+    fig.add_trace(go.Bar(
+        x=terms, y=vols,
+        marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'],
+        name='Realized Volatility'
+    ))
+    
+    fig.update_layout(
+        title='Volatility Term Structure (Current)',
+        template='plotly_white',
+        height=400,
+        yaxis_title='Volatility (%)'
+    )
+    return fig
+
+
+def create_market_breadth(df):
+    """Market breadth simulation based on price action"""
+    df = df.copy()
+    # Simulate advance/decline based on intraday momentum
+    df['Intraday_Momentum'] = (df['SPY_Close'] - df['SPY_Open']) / df['SPY_Open']
+    df['Adv_Dec'] = np.where(df['Intraday_Momentum'] > 0, 1, -1)
+    df['Breadth'] = df['Adv_Dec'].cumsum()
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['Breadth'],
+        mode='lines',
+        name='Breadth Line',
+        line=dict(color='green' if df['Breadth'].iloc[-1] > 0 else 'red', width=2),
+        fill='tozeroy',
+        fillcolor='rgba(0,128,0,0.1)'
+    ))
+    fig.add_hline(y=0, line_dash='dash', line_color='black')
+    fig.update_layout(
+        title='Market Breadth (Simulated Advance/Decline)',
+        template='plotly_white',
+        height=350
+    )
+    return fig
+
+
+def create_risk_reward_analysis(df):
+    """Risk/Reward analysis by regime"""
+    df = df.copy()
+    regime_stats = df.groupby('Regime_Label').agg({
+        'Returns': ['mean', 'std'],
+        'Realized_Vol': 'mean'
+    })
+    
+    risk_reward = {}
+    for regime in ['Bull', 'Sideways', 'Bear']:
+        mean_ret = regime_stats.loc[regime, ('Returns', 'mean')] * 252 * 100
+        std_ret = regime_stats.loc[regime, ('Returns', 'std')] * np.sqrt(252) * 100
+        risk_reward[regime] = {'Return': mean_ret, 'Risk': std_ret, 'RR': mean_ret/std_ret if std_ret > 0 else 0}
+    
+    fig = go.Figure()
+    regimes = list(risk_reward.keys())
+    colors = {'Bull': '#00CC96', 'Sideways': '#FFA500', 'Bear': '#FF4B4B'}
+    
+    for regime in regimes:
+        fig.add_trace(go.Scatter(
+            x=[risk_reward[regime]['Risk']],
+            y=[risk_reward[regime]['Return']],
+            mode='markers+text',
+            marker=dict(size=20, color=colors[regime]),
+            text=[regime],
+            textposition='top center',
+            name=regime
+        ))
+    
+    fig.update_layout(
+        title='Risk/Reward Analysis by Regime',
+        template='plotly_white',
+        height=400,
+        xaxis_title='Risk (Annualized Volatility %)',
+        yaxis_title='Return (Annualized %)',
+        showlegend=True
+    )
+    return fig
+
+
+def create_seasonality_chart(df):
+    """Monthly returns seasonality"""
+    df = df.copy()
+    df['Month'] = df.index.month
+    monthly_returns = df.groupby('Month')['Returns'].mean() * 100 * 12  # Annualized
+    
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    colors = ['green' if x > 0 else 'red' for x in monthly_returns.values]
+    
+    fig = go.Figure(data=[go.Bar(
+        x=month_names,
+        y=monthly_returns.values,
+        marker_color=colors,
+        name='Monthly Return'
+    )])
+    
+    fig.update_layout(
+        title='Seasonality: Average Monthly Returns (Annualized)',
+        template='plotly_white',
+        height=350,
+        yaxis_title='Return (%)'
+    )
+    return fig
+
+
+def create_gap_analysis(df):
+    """Gap analysis by regime"""
+    df = df.copy()
+    df['Gap'] = (df['SPY_Open'] - df['SPY_Close'].shift(1)) / df['SPY_Close'].shift(1) * 100
+    
+    fig = go.Figure()
+    colors = ['green' if x > 0 else 'red' for x in df['Gap']]
+    fig.add_trace(go.Bar(
+        x=df.index, y=df['Gap'],
+        marker_color=colors,
+        name='Gap %'
+    ))
+    fig.add_hline(y=0, line_dash='dash', line_color='black')
+    fig.update_layout(
+        title='Daily Gap Analysis (%)',
+        template='plotly_white',
+        height=350
+    )
+    return fig
+
+
+def create_volume_profile(df):
+    """Volume profile at price levels"""
+    df = df.copy()
+    # Create price bins
+    price_min = df['SPY_Close'].min()
+    price_max = df['SPY_Close'].max()
+    bins = np.linspace(price_min, price_max, 20)
+    
+    df['Price_Bin'] = pd.cut(df['SPY_Close'], bins=bins)
+    volume_profile = df.groupby('Price_Bin')['SPY_Volume'].sum()
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=volume_profile.values,
+        y=[str(x) for x in volume_profile.index],
+        orientation='h',
+        marker_color='steelblue',
+        name='Volume'
+    ))
+    fig.update_layout(
+        title='Volume Profile by Price Level',
+        template='plotly_white',
+        height=500,
+        xaxis_title='Volume',
+        yaxis_title='Price Range'
+    )
+    return fig
+
+
+def create_regime_switching_analysis(df):
+    """Analysis of regime switching patterns"""
+    df = df.copy()
+    transitions = df['Regime_Label'] != df['Regime_Label'].shift(1)
+    transition_df = df[transitions].copy()
+    
+    if len(transition_df) > 1:
+        transition_df['From'] = transition_df['Regime_Label'].shift(1)
+        transition_df['To'] = transition_df['Regime_Label']
+        
+        # Count transitions
+        transition_counts = transition_df.groupby(['From', 'To']).size()
+        
+        fig = go.Figure()
+        regimes = ['Bull', 'Sideways', 'Bear']
+        for to_regime in regimes:
+            from_counts = [transition_counts.get((f, to_regime), 0) for f in regimes]
+            fig.add_trace(go.Bar(
+                name=f'To {to_regime}',
+                x=regimes,
+                y=from_counts
+            ))
+        
+        fig.update_layout(
+            barmode='group',
+            title='Regime Switching Patterns',
+            template='plotly_white',
+            height=400
+        )
+    else:
+        fig = go.Figure()
+        fig.add_annotation(text="Insufficient data for regime switching analysis",
+                          xref="paper", yref="paper", x=0.5, y=0.5)
+    return fig
+
+
+def create_market_regime_indicator(df):
+    """Combined market regime indicator dashboard"""
+    df = df.copy()
+    
+    # Create composite score
+    df['Score'] = 0
+    # Trend (SMA alignment)
+    df['Score'] += np.where(df['SPY_Close'] > df['SMA_20'], 1, -1)
+    df['Score'] += np.where(df['SMA_20'] > df['SMA_50'], 1, -1)
+    # Momentum
+    df['Score'] += np.where(df['Momentum_10'] > 0, 1, -1)
+    # Volatility regime
+    df['Score'] += np.where(df['VIX'] < 20, 1, -1) if 'VIX' in df.columns else 0
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['Score'],
+        mode='lines',
+        name='Regime Score',
+        line=dict(color='purple', width=2),
+        fill='tozeroy',
+        fillcolor='rgba(128,0,128,0.1)'
+    ))
+    
+    fig.add_hline(y=3, line_dash='dash', line_color='#00CC96', annotation_text='Strong Bull')
+    fig.add_hline(y=0, line_dash='dash', line_color='#FFA500', annotation_text='Neutral')
+    fig.add_hline(y=-3, line_dash='dash', line_color='#FF4B4B', annotation_text='Strong Bear')
+    
+    fig.update_layout(
+        title='Composite Market Regime Indicator',
+        template='plotly_white',
+        height=400,
+        yaxis_range=[-5, 5]
+    )
+    return fig
+
+
+def create_correlation_regime_analysis(df):
+    """Correlation analysis between assets in different regimes"""
+    df = df.copy()
+    
+    # Calculate correlations by regime
+    corr_by_regime = {}
+    for regime in df['Regime_Label'].unique():
+        regime_data = df[df['Regime_Label'] == regime]
+        corr_matrix = regime_data[['SPY_Close', 'VIX', 'Yield_10Y', 'Gold', 'Commodities', 'USD']].corr()
+        corr_by_regime[regime] = corr_matrix
+    
+    # Show current regime correlation
+    current_regime = df['Regime_Label'].iloc[-1]
+    corr = corr_by_regime.get(current_regime, pd.DataFrame())
+    
+    fig = px.imshow(
+        corr,
+        text_auto='.2f',
+        color_continuous_scale='RdBu_r',
+        title=f'Asset Correlation in {current_regime} Regime',
+        template='plotly_white',
+        height=450
+    )
+    return fig
+
 
 if __name__ == "__main__":
     main()
